@@ -1,5 +1,10 @@
 import math
+import numpy as np
+import cv2
+import glob
+import matplotlib.pyplot as plt
 from collections import deque
+import helpers as h
 
 def create_queue(length = 10):
     return deque(maxlen=length)
@@ -63,7 +68,7 @@ class AdvancedLaneDetectorWithMemory:
                  lane_center_px_psp=600, real_world_lane_size_meters=(32, 3.7)):
         self.objpts = objpts
         self.imgpts = imgpts
-        (self.M_psp, self.M_inv_psp) = compute_perspective_transform_matrices(psp_src, psp_dst)
+        (self.M_psp, self.M_inv_psp) = h.compute_perspective_transform_matrices(psp_src, psp_dst)
 
         self.sliding_windows_per_line = sliding_windows_per_line
         self.sliding_window_half_width = sliding_window_half_width
@@ -98,10 +103,10 @@ class AdvancedLaneDetectorWithMemory:
         as well as small intermediate images overlaid on top to understand how the algorithm is performing
         """
         # First step - undistort the image using the instance's object and image points
-        undist_img = undistort_image(img, self.objpts, self.imgpts)
+        undist_img = h.undistort_image(img, self.objpts, self.imgpts)
         
         # Produce binary thresholded image from color and gradients
-        thres_img = get_combined_binary_thresholded_img(undist_img)
+        thres_img = h.get_combined_binary_thresholded_img(undist_img)
         
         # Create the undistorted and binary perspective transforms
         img_size = (undist_img.shape[1], undist_img.shape[0])
