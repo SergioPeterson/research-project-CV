@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import rospy
 from sensor_msgs.msg import Image
-from lab4_cam.srv import ImageSrv, ImageSrvResponse
+# from lab4_cam.srv import ImageSrv, ImageSrvResponse
 import cv2, time, sys
 from cv_bridge import CvBridge, CvBridgeError
 import numpy as np

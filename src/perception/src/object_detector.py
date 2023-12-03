@@ -9,12 +9,17 @@ from cv_bridge import CvBridge
 import matplotlib.pyplot as plt
 import os
 import time
+import glob
 import tf
 from geometry_msgs.msg import Point, PointStamped
 from std_msgs.msg import Header
+from importlib import reload
+import utils; reload(utils)
+from utils import *
 
 
 PLOTS_DIR = os.path.join(os.getcwd(), 'plots')
+
 
 class ObjectDetector:
     def __init__(self):
@@ -24,6 +29,10 @@ class ObjectDetector:
 
         self.cv_color_image = None
         self.cv_depth_image = None
+        # objpts, imgpts = None, None  # these should be set appropriately
+        # psp_src, psp_dst = None, None  # set appropriate source and destination points for perspective transform
+        # self.lane_detector = classes.AdvancedLaneDetectorWithMemory(objpts, imgpts, psp_src, psp_dst, ...)
+
 
         self.color_image_sub = rospy.Subscriber("/camera/color/image_raw", Image, self.color_image_callback)
         self.depth_image_sub = rospy.Subscriber("/camera/aligned_depth_to_color/image_raw", Image, self.depth_image_callback)
@@ -77,6 +86,21 @@ class ObjectDetector:
             print("Error:", e)
 
     def process_images(self):
+
+        '''
+        example line detection using helpers and classes files
+        cal_imgs_paths = glob.glob(calibration_dir + "/*.jpg")
+        cx = 9
+        cy = 6
+        opts, ipts = findImgObjPoints(cal_imgs_paths, cx, cy)
+        (bottom_px, right_px) = (copy_combined.shape[0] - 1, copy_combined.shape[1] - 1) 
+        pts = np.array([[210,bottom_px],[595,450],[690,450], [1110, bottom_px]], np.int32)
+        src_pts = pts.astype(np.float32)
+        dst_pts = np.array([[200, bottom_px], [200, 0], [1000, 0], [1000, bottom_px]], np.float32)
+        ld = AdvancedLaneDetectorWithMemory(opts, ipts, src_pts, dst_pts, 20, 100, 50)
+        proc_img = ld.process_image(test_img)
+        '''
+
         # Convert the color image to HSV color space
         hsv = cv2.cvtColor(self.cv_color_image, cv2.COLOR_BGR2HSV)
         # TODO: Define range for cup color in HSV
@@ -136,9 +160,20 @@ class ObjectDetector:
                     cup_img[y_coords, x_coords] = [0, 0, 255]  # Highlight cup points in red
                     cv2.circle(cup_img, (center_x, center_y), 5, [0, 255, 0], -1)  # Draw green circle at center
                     
+                    # # Undistort the image before processing for lane detection
+                    # undist_img = h.undistort_image(cup_img, self.objpts, self.imgpts)
+                    
+                    # # Process image for lane detection
+                    # lane_detection_result = self.lane_detector.process_image(undist_img)
+
+                    # # Convert lane_detection_result to a ROS Image message and publish
+                    # ros_lane_image = self.bridge.cv2_to_imgmsg(lane_detection_result, "bgr8")
+                    # self.image_pub.publish(ros_lane_image)
+
                     # Convert to ROS Image message and publish
                     ros_image = self.bridge.cv2_to_imgmsg(cup_img, "bgr8")
                     self.image_pub.publish(ros_image)
+
             except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException) as e:
                 print("TF Error: " + e)
                 return
