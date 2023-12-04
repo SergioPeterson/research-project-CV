@@ -4,7 +4,35 @@ import cv2
 import glob
 import matplotlib.pyplot as plt
 from collections import deque
-import helpers as h
+from helpers import *
+import utils2; reload(utils2)
+from utils2 import *
+
+class Starter:
+    def __init__(self, path):
+        test_image = 0
+        cal_imgs_paths = glob.glob(path + "/src/camera_cal/*.jpg")
+         #might change on the camera
+        cx = 9
+        cy = 6
+        img_size = 305280
+        opts, ipts = findImgObjPoints(cal_imgs_paths, cx, cy)
+        test_imgs_paths = glob.glob(path + "/src/test_images/*.jpg")
+        test_imgs = np.asarray(list(map(lambda img_path: load_image(img_path), test_imgs_paths)))
+        undist_test_imgs = np.asarray(list(map(lambda img: undistort_image(img, opts, ipts), test_imgs)))
+        copy_combined = np.copy(undist_test_imgs[test_image])
+        (bottom_px, right_px) = (copy_combined.shape[0] - 1, copy_combined.shape[1] - 1) 
+        pts = np.array([[0,600],[595,455],[1120,455], [right_px-115, 600]], np.int32)
+        dst_pts = np.array([[200, bottom_px], [200, 0], [1000, 0], [1000, bottom_px]], np.float32)
+        src_pts = pts.astype(np.float32)
+        im_w = 1919
+        im_h = int(img_size / (im_w * 3))
+        self.ld = AdvancedLaneDetectorWithMemory(opts, ipts, src_pts, dst_pts, 20, 100, 50, img_dimensions=(im_h,im_w))
+ 
+    def get_laneDectection(self):
+        return self.ld
+
+
 
 def create_queue(length = 10):
     return deque(maxlen=length)
@@ -68,7 +96,7 @@ class AdvancedLaneDetectorWithMemory:
                  lane_center_px_psp=600, real_world_lane_size_meters=(32, 3.7)):
         self.objpts = objpts
         self.imgpts = imgpts
-        (self.M_psp, self.M_inv_psp) = h.compute_perspective_transform_matrices(psp_src, psp_dst)
+        (self.M_psp, self.M_inv_psp) = compute_perspective_transform_matrices(psp_src, psp_dst)
 
         self.sliding_windows_per_line = sliding_windows_per_line
         self.sliding_window_half_width = sliding_window_half_width
@@ -103,10 +131,10 @@ class AdvancedLaneDetectorWithMemory:
         as well as small intermediate images overlaid on top to understand how the algorithm is performing
         """
         # First step - undistort the image using the instance's object and image points
-        undist_img = h.undistort_image(img, self.objpts, self.imgpts)
+        undist_img = undistort_image(img, self.objpts, self.imgpts)
         
         # Produce binary thresholded image from color and gradients
-        thres_img = h.get_combined_binary_thresholded_img(undist_img)
+        thres_img = get_combined_binary_thresholded_img(undist_img)
         
         # Create the undistorted and binary perspective transforms
         img_size = (undist_img.shape[1], undist_img.shape[0])
@@ -134,7 +162,7 @@ class AdvancedLaneDetectorWithMemory:
         self.previous_left_lane_line = ll
         self.previous_right_lane_line = rl
         
-        return final_img
+        return final_img,lcr, rcr, lco
     
     def draw_lane_curvature_text(self, img, left_curvature_meters, right_curvature_meters, center_offset_meters):
         """

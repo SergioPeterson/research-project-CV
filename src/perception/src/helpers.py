@@ -9,8 +9,8 @@ from numpy.linalg import *
 import glob
 import matplotlib.pyplot as plt
 from importlib import reload
-import utils; reload(utils)
-from utils import *
+import utils2; reload(utils2)
+from utils2 import *
 
 #### FROM LAB 4 ####
 
@@ -88,6 +88,33 @@ def threshold_img(img, channel, thres=(0, 255)):
     mask_ch = np.zeros_like(img_ch)
     mask_ch[ (thres[0] <= img_ch) & (thres[1] >= img_ch) ] = 1
     return mask_ch
+
+def compute_hsv_white_red_binary(rgb_img):
+    """
+    Returns a binary thresholded image produced retaining only white and yellow elements on the picture
+    The provided image should be in RGB format
+    """
+    hsv_img = to_hsv(rgb_img)
+    
+    # Compute a binary thresholded image where red is isolated from HSV components
+    img_hsv_red_bin = np.zeros_like(hsv_img[:,:,0])
+    img_hsv_red_bin[((hsv_img[:,:,0] >= 0) & (hsv_img[:,:,0] <= 25))
+                 & ((hsv_img[:,:,1] >= 50) & (hsv_img[:,:,1] <= 255))
+                 & ((hsv_img[:,:,2] >= 80) & (hsv_img[:,:,2] <= 255))                
+                ] = 1
+    
+    # Compute a binary thresholded image where white is isolated from HSV components
+    img_hsv_white_bin = np.zeros_like(hsv_img[:,:,0])
+    img_hsv_white_bin[((hsv_img[:,:,0] >= 0) & (hsv_img[:,:,0] <= 255))
+                 & ((hsv_img[:,:,1] >= 0) & (hsv_img[:,:,1] <= 115))
+                 & ((hsv_img[:,:,2] >= 140) & (hsv_img[:,:,2] <= 255))                
+                ] = 1
+    
+    # Now combine both
+    img_hls_white_red_bin = np.zeros_like(hsv_img[:,:,0])
+    img_hls_white_red_bin[(img_hsv_red_bin == 1) | (img_hsv_white_bin == 1)] = 1
+
+    return img_hls_white_red_bin
 
 def compute_hls_white_yellow_binary(rgb_img): ## TODO: Detect red & white instead of yellow & white
     """
