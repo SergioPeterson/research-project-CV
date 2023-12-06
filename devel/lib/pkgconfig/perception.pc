@@ -1,8 +1,0 @@
-prefix=/home/cc/ee106a/fa23/class/ee106a-ade/Desktop/test/devel
-
-Name: perception
-Description: Description of perception
-Version: 0.0.0
-Cflags: 
-Libs: -L${prefix}/lib 
-Requires: 

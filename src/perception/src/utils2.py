@@ -1,13 +1,8 @@
-# Main imports
 import numpy as np
 import cv2
 import glob
 import matplotlib.pyplot as plt
 
-
-##############################################################################
-###################      IMAGE MODIFICATION FUNCTIONS      ###################
-##############################################################################
 
 def to_grayscale(img):
     """
@@ -40,9 +35,6 @@ def to_lab(img):
     return cv2.cvtColor(img, cv2.COLOR_RGB2LAB  )
 
 
-##############################################################################
-#################    IMAGE LOADING AND RENDERING FUNCTIONS   #################
-##############################################################################
 def load_image(path, to_rgb=True):
     """
     Load image from the given path. By default the returned image is in RGB.
