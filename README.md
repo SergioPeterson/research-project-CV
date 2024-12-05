@@ -41,7 +41,7 @@ pip install -r requirements.txt
 ### Clone the Repository
 
 ```bash
-git clone https://github.com/yourusername/advanced-lane-detection.git
+git clone https://github.com/SergioPeterson/research-project-CV.git
 cd advanced-lane-detection
 ```
 
